@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="stockstyle.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analízis</title>
+</head>
+<body>
+
+<h1>Stocks</h1>
+<form id="data-request-form">
+    <label for="stock-name">Please input stock name:</label>
+    <input type="text" id="stock-name" name="stockname" required>
+    <label for="date-from">Date from:</label>
+    <input type="date" id="date-from" name="from" required>
+    <label for="date-to">Date until:</label>
+    <input type="date" id="date-to" name="to">
+    <button type="submit" id="submit-btn">Submit</button>
+</form>
+<h1 id="test"></h1>
+<div class="chart-holder">
+<canvas id="myChart"></canvas>
+</div>
+<script src="datarequest.js"></script>
+</body>
+</html>

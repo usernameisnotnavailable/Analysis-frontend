@@ -1,0 +1,1 @@
+docker run --name frontapp -p 80:80 --rm --network analysis_my-network -v "D:\Programozás\Saját projektek\Analysis-front-end:/usr/share/nginx/html" front-end

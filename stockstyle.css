@@ -1,0 +1,15 @@
+.body{
+    display: flex;
+}
+
+.chart-holder{
+    display: flex;
+    width: 80%;
+    margin-right: 10%;
+    margin-left: 10%;
+    border: 1px solid black;    
+}
+
+#myChart{
+    width: 100%;
+}
