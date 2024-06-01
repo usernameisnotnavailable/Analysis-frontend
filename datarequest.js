@@ -60,13 +60,6 @@ function drawTable(){
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 1;
     
-    
-    console.log(canvasZoom.width);
-
-    // a középpont felé kellene eltolni a jelenlegi egér irányából talán...
-
-    console.log('translateFromMouseX: ' + translateFromMouse.x);
-    console.log('translateFromMouseY: ' + translateFromMouse.y);
     ctx.translate(0 - translateFromMouse.x, canvasHeight - translateFromMouse.y);
     ctx.save();
 
@@ -146,13 +139,6 @@ function drawTable(){
         ctx.moveTo(barTopX, minPricePointY);
         ctx.lineTo(barTopX + barWidth, minPricePointY);
         ctx.stroke();
-
-        ctx.save();
-        ctx.lineWidth = 1;
-        ctx.setLineDash([2, 2]);
-
-        ctx.restore(); 
-
       
     }
 }
@@ -176,8 +162,6 @@ function translateMouseToCanvas(){
     console.log(canvasZoom.width);
     translateFromMouse.x = - (canvasMiddleX - mousePosition.x) * canvasZoom.width / 4;
     translateFromMouse.y = - (canvasMiddleY - mousePosition.y) * canvasZoom.width / 4;
-
-  
 
     if (canvasZoom.width === 1 && canvasZoom.height === 1) {
         translateFromMouse.x = 0;
