@@ -102,19 +102,17 @@ function drawTable(){
             barTopY = - ((openPrice - chartMinValue) / ratio);
             barHeight = (openPrice - closePrice) / ratio;
             ctx.fillStyle = 'red';
+            ctx.strokeStyle = 'red';
         } else {
             barTopY = - ((closePrice - chartMinValue) / ratio);
             ctx.fillStyle = 'green';
+            ctx.strokeStyle = 'green';
             barHeight = (closePrice - openPrice) / ratio;
         }
 
         // draw bar and outline
         ctx.fillRect(barTopX, barTopY, barWidth, barHeight);
-        ctx.strokeRect(barTopX, barTopY, barWidth, barHeight);
-
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 2;
-        
+                     
         // draw line from bar to maxprice
         ctx.beginPath();
         let barMiddlePointX = (barTopX+(barTopX+barWidth)) / 2;
@@ -123,10 +121,7 @@ function drawTable(){
         ctx.moveTo(barMiddlePointX, barTopY);
         ctx.lineTo(barMiddlePointX, maxPricePointY);
         ctx.stroke();
-        // draw line horizontally on max price
-        ctx.moveTo(barTopX, maxPricePointY);
-        ctx.lineTo(barTopX + barWidth, maxPricePointY);
-        ctx.stroke();
+  
         // drawline from bar to minprice
         let minPrice = currentDatas[pivot].minPrice;
         let minPricePointY = -((minPrice - chartMinValue) / ratio);
@@ -134,10 +129,7 @@ function drawTable(){
         ctx.moveTo(barMiddlePointX, barTopY + barHeight);
         ctx.lineTo(barMiddlePointX, minPricePointY);
         ctx.stroke();
-        // draw line horizontally on min price
-        ctx.moveTo(barTopX, minPricePointY);
-        ctx.lineTo(barTopX + barWidth, minPricePointY);
-        ctx.stroke();
+    
         pivot++;
     }
 }
