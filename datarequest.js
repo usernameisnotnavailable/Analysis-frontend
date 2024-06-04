@@ -178,10 +178,10 @@ function zoom(e){
 
     if (e.deltaY > 0){
         canvasZoom.zoomValue -= 1;
-        zoomOutOnData();
+        zoomOutOfData();
     } else {
         canvasZoom.zoomValue += 1;
-        zoomInOnData();
+        zoomOnData();
     }
     
     //translateMouseToCanvas();
