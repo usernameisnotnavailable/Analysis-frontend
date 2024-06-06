@@ -28,14 +28,14 @@ let viewRange = {
 const canvasWidth = 750 * window.devicePixelRatio;
 const canvasHeight = 350 * window.devicePixelRatio;
 
-
-let chartWidth = document.getElementById('myChart').clientWidth;
-let chartHeight = document.getElementById('myChart').clientHeight;
 const canvas = document.getElementById('myChart');
+let chartWidth = canvas.offsetWidth;
+let chartHeight = canvas.offsetHeight;
+
 
 window.addEventListener('resize', () => {
-    chartWidth = document.getElementById('myChart').clientWidth;
-    chartHeight = document.getElementById('myChart').clientHeight;
+    chartWidth = canvas.offsetWidth;
+    chartHeight = canvas.offsetHeight;
 });
 
 
@@ -95,13 +95,13 @@ function drawTable(){
     const ratio = (chartMaxValue - chartMinValue) / canvasHeight;
     
     for (let i = 0; i < range; i++) {
-         console.log(pivot);
+        
         // Actual prices
         let closePrice = currentDatas[pivot].closePrice;
         let openPrice = currentDatas[pivot].openPrice;
         
         let barTopY;
-        // dummy bar width
+        // bar width
         let barWidth = availableSpacePerBar - barSpace;
         let barTopX = i * barWidth + barSpace * i + barSpace / 4;
         let barHeight;
@@ -133,7 +133,6 @@ function drawTable(){
         // drawline from bar to minprice
         let minPrice = currentDatas[pivot].minPrice;
         let minPricePointY = -((minPrice - chartMinValue) / ratio);
-        // console.log('Stock: ' + i + ',Open price: ' + openPrice + ',Close price: ' + closePrice + ', Max price: ' + maxPrice + ', Min price: ' + minPrice);
         ctx.moveTo(barMiddlePointX, barTopY + barHeight);
         ctx.lineTo(barMiddlePointX, minPricePointY);
         ctx.stroke();
@@ -191,6 +190,8 @@ function zoom(e){
 }
 
 function zoomOnData() {
+    console.log('canvasWidth ' + canvasWidth);
+    console.log('mousePosition.x' + mousePosition.x);
     if (mousePosition.x < canvasWidth / 3) {
         viewRange.endIndex--;
     } else if (mousePosition.x > (canvasWidth / 3) * 2) {
