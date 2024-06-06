@@ -93,8 +93,9 @@ function drawTable(){
 
     // ratio: amount of huf per pixel
     const ratio = (chartMaxValue - chartMinValue) / canvasHeight;
-
-     for (let i = 0; i < endIndex; i++) {
+    
+    for (let i = 0; i < range; i++) {
+         console.log(pivot);
         // Actual prices
         let closePrice = currentDatas[pivot].closePrice;
         let openPrice = currentDatas[pivot].openPrice;
@@ -138,6 +139,7 @@ function drawTable(){
         ctx.stroke();
     
         pivot++;
+        
     }
 }
 
@@ -217,10 +219,10 @@ function zoomOutOfData() {
         viewRange.endIndex++;
         viewRange.startIndex--;
     }
-    if (viewRange.startIndex < min) {
+    if (viewRange.startIndex <= min) {
         viewRange.startIndex = min;
     }
-    if (viewRange.endIndex > max) {
+    if (viewRange.endIndex >= max) {
         viewRange.endIndex = max;
     }
 }
