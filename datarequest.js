@@ -1,16 +1,17 @@
 let currentDatas;
-let canvasZoom = {
+/* let canvasZoom = {
     height: 1,
     width: 1,
     zoomValue: 0
-};
+}; */
+
+/* let translateFromMouse = {
+    x: 0,
+    y: 0
+}; */
 let mousePosition = {
-    x: 0,
-    y: 0
-};
-let translateFromMouse = {
-    x: 0,
-    y: 0
+  x: 0,
+  y: 0,
 };
 let dragCanvasBy = {
     x: 0,
@@ -19,24 +20,20 @@ let dragCanvasBy = {
     initialY: 0,
     misPositionX: 0,
     misPositionY: 0
-}
+};
 let viewRange = {
     startIndex: 0, 
     endIndex: 0
 };
 
-const canvasWidth = 750 * window.devicePixelRatio;
-const canvasHeight = 350 * window.devicePixelRatio;
-
 const canvas = document.getElementById('myChart');
-let chartWidth = canvas.offsetWidth;
-let chartHeight = canvas.offsetHeight;
+let canvasWidth = canvas.offsetWidth;
+let canvasHeight = canvas.offsetHeight;
 
-
-window.addEventListener('resize', () => {
-    chartWidth = canvas.offsetWidth;
-    chartHeight = canvas.offsetHeight;
-});
+    window.addEventListener('resize', () => {
+    canvasWidth = canvas.offsetWidth;
+    canvasHeight = canvas.offsetHeight;
+}); 
 
 
 
@@ -63,11 +60,8 @@ async function requestData(e){
 }
 
 
-
 function drawTable(){
-    
     const ctx = canvas.getContext('2d');
-
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
     //ctx.scale(canvasZoom.width, canvasZoom.height);
@@ -76,16 +70,10 @@ function drawTable(){
     ctx.translate(0 + dragCanvasBy.x + dragCanvasBy.misPositionX, canvasHeight + dragCanvasBy.y + dragCanvasBy.misPositionY);
     ctx.save();
 
-    let minimumValue = calculateMin();
-    let maximumValue = calculateMax();
-
-    const chartMinValue = minimumValue;
-    const chartMaxValue = maximumValue;
-
     let startIndex = viewRange.startIndex;
     let range = viewRange.endIndex - viewRange.startIndex;
     let pivot = startIndex;
-        
+    
     let availableSpacePerBar = canvasWidth / range;
     let barSpace = availableSpacePerBar / 3;
     let barWidth = availableSpacePerBar - barSpace;
@@ -93,6 +81,8 @@ function drawTable(){
     let barTopY;
     let barHeight;
 
+    const chartMinValue = calculateMin();
+    const chartMaxValue = calculateMax();
     // ratio: amount of huf per pixel
     const ratio = (chartMaxValue - chartMinValue) / canvasHeight;
     
@@ -112,10 +102,9 @@ function drawTable(){
             ctx.strokeStyle = 'green';
             barHeight = (closePrice - openPrice) / ratio;
         }
-
         // draw bar and outline
         ctx.fillRect(barTopX, barTopY, barWidth, barHeight);
-                     
+                  
         // draw line from bar to maxprice
         ctx.beginPath();
         let barMiddlePointX = (barTopX+(barTopX+barWidth)) / 2;
@@ -133,7 +122,6 @@ function drawTable(){
         ctx.stroke();
     
         pivot++;
-        
     }
 }
 
@@ -166,27 +154,23 @@ canvas.addEventListener('mouseup', restoreCursor);
 
 function zoom(e){
     e.preventDefault();
-    canvasZoom.width += (e.deltaY * -0.0001);
-    canvasZoom.height += (e.deltaY * -0.0001);
-        
+/*     canvasZoom.width += (e.deltaY * -0.0001);
+    canvasZoom.height += (e.deltaY * -0.0001); */
     mousePosition.x = e.offsetX;
     mousePosition.y = e.offsetY;
 
     if (e.deltaY > 0){
-        canvasZoom.zoomValue -= 1;
+       /*  canvasZoom.zoomValue -= 1; */
         zoomOutOfData();
     } else {
-        canvasZoom.zoomValue += 1;
+        /* canvasZoom.zoomValue += 1; */
         zoomOnData();
     }
-    
     //translateMouseToCanvas();
     drawTable();
 }
 
 function zoomOnData() {
-    console.log('canvasWidth ' + canvasWidth);
-    console.log('mousePosition.x' + mousePosition.x);
     if (mousePosition.x < canvasWidth / 3) {
         viewRange.endIndex--;
     } else if (mousePosition.x > (canvasWidth / 3) * 2) {
@@ -201,7 +185,6 @@ function zoomOnData() {
     if (viewRange.startIndex >= viewRange.endIndex) {
         viewRange.startIndex--;;
     }
-
 }
 
 function zoomOutOfData() {
@@ -233,25 +216,20 @@ function dragCanvas(e) {
 }
 
 function updateCursorMovement(e) {
-        dragCanvasBy.x = - (dragCanvasBy.initialX - e.offsetX);
-        dragCanvasBy.y = - (dragCanvasBy.initialY - e.offsetY);
-        console.log('Dragged by on x: ' + dragCanvasBy.x);
-        console.log('Dragged by on y: ' + dragCanvasBy.y);
-        drawTable();
+    dragCanvasBy.x = - (dragCanvasBy.initialX - e.offsetX);
+    dragCanvasBy.y = - (dragCanvasBy.initialY - e.offsetY);
+    drawTable();
 }
 
 function restoreCursor() {
     dragCanvasBy.misPositionX = dragCanvasBy.x + dragCanvasBy.misPositionX;
     dragCanvasBy.misPositionY = dragCanvasBy.y + dragCanvasBy.misPositionY;
-    console.log('New mispositionX: ' + dragCanvasBy.misPositionX);
-    console.log('New mispositionY: ' + dragCanvasBy.misPositionY);
     canvas.style.cursor = 'auto';
     canvas.removeEventListener('mousemove', updateCursorMovement);
 }
 
 
-function translateMouseToCanvas(){
-    
+/* function translateMouseToCanvas(){
     let canvasMiddleX = canvas.width / 2;
     let canvasMiddleY = canvas.height / 2;
     translateFromMouse.x = - (canvasMiddleX - mousePosition.x) * canvasZoom.width / 4;
@@ -262,7 +240,7 @@ function translateMouseToCanvas(){
         translateFromMouse.y = 0;
 
     }
-}
+} */
 
 async function test(){
     currentDatas = await fetchStocks('richter', '2021-01-10', '2021-08-15');
