@@ -83,29 +83,24 @@ function drawTable(){
     const chartMaxValue = maximumValue;
 
     let startIndex = viewRange.startIndex;
-    let endIndex = viewRange.endIndex;
     let range = viewRange.endIndex - viewRange.startIndex;
     let pivot = startIndex;
-
         
     let availableSpacePerBar = canvasWidth / range;
     let barSpace = availableSpacePerBar / 3;
+    let barWidth = availableSpacePerBar - barSpace;
+
+    let barTopY;
+    let barHeight;
 
     // ratio: amount of huf per pixel
     const ratio = (chartMaxValue - chartMinValue) / canvasHeight;
     
     for (let i = 0; i < range; i++) {
-        
-        // Actual prices
         let closePrice = currentDatas[pivot].closePrice;
         let openPrice = currentDatas[pivot].openPrice;
-        
-        let barTopY;
-        // bar width
-        let barWidth = availableSpacePerBar - barSpace;
         let barTopX = i * barWidth + barSpace * i + barSpace / 4;
-        let barHeight;
-
+        
         if (closePrice < openPrice){
             barTopY = - ((openPrice - chartMinValue) / ratio);
             barHeight = (openPrice - closePrice) / ratio;
@@ -214,8 +209,10 @@ function zoomOutOfData() {
     let min = 0;
     if (mousePosition.x < canvasWidth / 3) {
         viewRange.startIndex--;
+        if (viewRange.startIndex <= 0) viewRange.endIndex++;
     } else if (mousePosition.x > (canvasWidth / 3) * 2) {
         viewRange.endIndex++;
+        if (viewRange.endIndex >= max) viewRange.startIndex--;
     } else {
         viewRange.endIndex++;
         viewRange.startIndex--;
