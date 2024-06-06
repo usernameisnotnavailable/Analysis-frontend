@@ -1,4 +1,3 @@
-let currentDatas;
 /* let canvasZoom = {
     height: 1,
     width: 1,
@@ -9,6 +8,7 @@ let currentDatas;
     x: 0,
     y: 0
 }; */
+let currentDatas;
 let mousePosition = {
   x: 0,
   y: 0,
@@ -19,7 +19,9 @@ let dragCanvasBy = {
     initialX: 0,
     initialY: 0,
     misPositionX: 0,
-    misPositionY: 0
+    misPositionY: 0,
+    zoomModifierX: 0,
+    zoomModifierY: 0
 };
 let viewRange = {
     startIndex: 0, 
@@ -29,13 +31,18 @@ let viewRange = {
 const canvas = document.getElementById('myChart');
 let canvasWidth = canvas.offsetWidth;
 let canvasHeight = canvas.offsetHeight;
+const submitBtn = document.getElementById('submit-btn');
+const testText = document.getElementById('test');
 
-    window.addEventListener('resize', () => {
+submitBtn.addEventListener('click', requestData);
+canvas.addEventListener('wheel', zoom);
+canvas.addEventListener('mousedown', dragCanvas);
+canvas.addEventListener('mouseup', restoreCursor);
+
+window.addEventListener('resize', () => {
     canvasWidth = canvas.offsetWidth;
     canvasHeight = canvas.offsetHeight;
 }); 
-
-
 
 async function fetchStocks(stockname, from, to){
     const response = await fetch(`http://localhost:8080/stocks?stock=${stockname}&from=${from}&to=${to}`);
@@ -43,10 +50,6 @@ async function fetchStocks(stockname, from, to){
 
     return data;
 }
-
-const submitBtn = document.getElementById('submit-btn')
-submitBtn.addEventListener('click', requestData);
-const testText = document.getElementById('test');
 
 async function requestData(e){
     e.preventDefault();
@@ -58,7 +61,6 @@ async function requestData(e){
 
     drawTable();
 }
-
 
 function drawTable(){
     const ctx = canvas.getContext('2d');
@@ -125,7 +127,6 @@ function drawTable(){
     }
 }
 
-
 function calculateMin() {
     let minimumValue = currentDatas[viewRange.startIndex].minPrice;
     for(let i = viewRange.startIndex; i < viewRange.endIndex; i++){
@@ -145,12 +146,6 @@ function calculateMax(){
     }
     return maximumValue;
 }
-
-canvas.addEventListener('wheel', zoom);
-canvas.addEventListener('mousedown', dragCanvas);
-canvas.addEventListener('mouseup', restoreCursor);
-
-
 
 function zoom(e){
     e.preventDefault();
