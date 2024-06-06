@@ -12,6 +12,14 @@ let translateFromMouse = {
     x: 0,
     y: 0
 };
+let dragCanvasBy = {
+    x: 0,
+    y: 0,
+    initialX: 0,
+    initialY: 0,
+    misPositionX: 0,
+    misPositionY: 0
+}
 let viewRange = {
     startIndex: 0, 
     endIndex: 0
@@ -63,10 +71,9 @@ function drawTable(){
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
     //ctx.scale(canvasZoom.width, canvasZoom.height);
-    console.log('canvasWidth' + canvasWidth);
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 1;
-    ctx.translate(0, canvasHeight);
+    ctx.translate(0 + dragCanvasBy.x + dragCanvasBy.misPositionX, canvasHeight + dragCanvasBy.y + dragCanvasBy.misPositionY);
     ctx.save();
 
     let minimumValue = calculateMin();
@@ -136,7 +143,6 @@ function drawTable(){
 
 
 function calculateMin() {
-    console.log(currentDatas[viewRange.startIndex].minPrice);
     let minimumValue = currentDatas[viewRange.startIndex].minPrice;
     for(let i = viewRange.startIndex; i < viewRange.endIndex; i++){
         if (currentDatas[i].minPrice < minimumValue){
@@ -158,6 +164,8 @@ function calculateMax(){
 
 canvas.addEventListener('wheel', zoom);
 canvas.addEventListener('mousedown', dragCanvas);
+canvas.addEventListener('mouseup', restoreCursor);
+
 
 
 function zoom(e){
@@ -217,12 +225,30 @@ function zoomOutOfData() {
     }
 }
 
-function dragCanvas(e){
-    mousePosition.x = e.offsetX;
-    mousePosition.y = e.offsetY;
-    
+function dragCanvas(e) {
+    canvas.style.cursor = 'move';
+    dragCanvasBy.initialX = e.offsetX;
+    dragCanvasBy.initialY = e.offsetY;
+    canvas.addEventListener('mousemove', updateCursorMovement);
 }
-// canvas.style.cursor = 'move';
+
+function updateCursorMovement(e) {
+        dragCanvasBy.x = - (dragCanvasBy.initialX - e.offsetX);
+        dragCanvasBy.y = - (dragCanvasBy.initialY - e.offsetY);
+        console.log('Dragged by on x: ' + dragCanvasBy.x);
+        console.log('Dragged by on y: ' + dragCanvasBy.y);
+        drawTable();
+}
+
+function restoreCursor() {
+    dragCanvasBy.misPositionX = dragCanvasBy.x + dragCanvasBy.misPositionX;
+    dragCanvasBy.misPositionY = dragCanvasBy.y + dragCanvasBy.misPositionY;
+    console.log('New mispositionX: ' + dragCanvasBy.misPositionX);
+    console.log('New mispositionY: ' + dragCanvasBy.misPositionY);
+    canvas.style.cursor = 'auto';
+    canvas.removeEventListener('mousemove', updateCursorMovement);
+}
+
 
 function translateMouseToCanvas(){
     
