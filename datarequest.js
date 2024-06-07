@@ -59,30 +59,28 @@ function drawTable(){
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
     ctx.translate(0 + canvasDragging.slidedPositionX, canvasHeight + canvasDragging.slidedPositionY);
-    
     let startIndex = viewRange.startIndex;
     let endIndex = viewRange.endIndex;
     
- 
     // Bar size and spacing initialization
     let range = endIndex - startIndex;
     let availableSpacePerBar = canvasWidth / range;
     let barSpace = availableSpacePerBar / 3;
     let barWidth = availableSpacePerBar - barSpace;   
 
-    // Based on canvas position recalculate the starting point and reassing the values
-    let startIndexModifier = calculateModifier(startIndex, availableSpacePerBar);
+    // dynamic index calculation
+    let startIndexModifier = calculateStartIndexVisibility(startIndex, availableSpacePerBar);
     startIndex = dynamicStartIndex(startIndex, startIndexModifier);
     range = endIndex - startIndex;
+    let endIndexModifier = calculateEndIndexVisibility(range, availableSpacePerBar);
+    endIndex = dynamicEndIndex(endIndex, endIndexModifier);
+    
+    range = endIndex - startIndex;
     let pivot = startIndex;
-
+    // ratio: amount of huf per pixel Y axis
+    const ratio = (chartMaxValue - chartMinValue) / canvasHeight;
     let barTopY;
     let barHeight;
-
-
-    // ratio: amount of huf per pixel
-    const ratio = (chartMaxValue - chartMinValue) / canvasHeight;
-    
     for (let i = 0; i < range; i++) {
         let closePrice = currentDatas[pivot].closePrice;
         let openPrice = currentDatas[pivot].openPrice;
@@ -99,7 +97,7 @@ function drawTable(){
             ctx.strokeStyle = 'green';
             barHeight = (closePrice - openPrice) / ratio;
         }
-        // draw bar and outline
+        // draw bar
         ctx.fillRect(barTopX, barTopY, barWidth, barHeight);
                   
         // draw line from bar to maxprice
@@ -128,11 +126,21 @@ function dynamicStartIndex(startIndex, startIndexModifier) {
     return startIndex;
 }
 
-function calculateModifier(startIndex, availableSpacePerBar) {
+function calculateStartIndexVisibility(startIndex, availableSpacePerBar) {
     let startIndexModifier = Math.floor(canvasDragging.slidedPositionX / availableSpacePerBar);
     startIndexModifier = Math.min(startIndexModifier, startIndex);
-    
     return startIndexModifier;
+}
+
+function calculateEndIndexVisibility(range, availableSpacePerBar) {
+    let endIndexModifier = Math.floor((canvasWidth - range * availableSpacePerBar) / availableSpacePerBar);
+    return endIndexModifier;
+}
+
+function dynamicEndIndex(endIndex, endIndexModifier) {
+    endIndex += endIndexModifier;
+    endIndex = Math.min(endIndex, currentDatas.length);
+    return endIndex;
 }
 
 function calculateMin() {
@@ -226,7 +234,6 @@ function restoreCursor() {
     drawTable();
 }
 
-
 async function test(){
     currentDatas = await fetchStocks('richter', '2021-01-10', '2021-08-15');
     console.log(currentDatas);
@@ -237,5 +244,3 @@ async function test(){
 }
 
 test();
-
-
