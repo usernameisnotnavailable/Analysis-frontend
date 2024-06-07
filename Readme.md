@@ -1,3 +1,4 @@
 #Analysis-frontend
 
-Goal is to provide a graphical interface which connects to Analysis-backend.
+Goal is to provide an interface which connects to Analysis-backend.
+Implement a dynamic canvas to display the data in a modern fashion.
