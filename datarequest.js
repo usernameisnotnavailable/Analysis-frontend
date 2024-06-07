@@ -1,23 +1,13 @@
- let canvasZoom = {
-    height: 1,
-    width: 1,
-    zoomValue: 0
-}; 
-
- let translateFromMouse = {
-    x: 0,
-    y: 0
-}; 
 let currentDatas;
 let mousePosition = {
   x: 0,
   y: 0,
 };
-let dragCanvasBy = {
+let canvasDragging = {
     initialX: 0,
     initialY: 0,
-    misPositionX: 0,
-    misPositionY: 0,
+    slidedPositionX: 0,
+    slidedPositionY: 0,
     zoomModifierX: 0,
     zoomModifierY: 0
 };
@@ -68,34 +58,22 @@ function drawTable(){
     ctx.save();
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
+    ctx.translate(0 + canvasDragging.slidedPositionX, canvasHeight + canvasDragging.slidedPositionY);
+    
     let startIndex = viewRange.startIndex;
     let endIndex = viewRange.endIndex;
-    //ctx.scale(canvasZoom.width, canvasZoom.height);
- 
-    console.log('dragCanvasBy.x ' + dragCanvasBy.x);
-    console.log('dragCanvasBy.misPositionX ' + dragCanvasBy.misPositionX);
-    console.log('dragCanvasBy.y ' + dragCanvasBy.y);
-    console.log('dragCanvasBy.misPositionY ' + dragCanvasBy.misPositionY);
-    ctx.translate(0 + dragCanvasBy.misPositionX, canvasHeight + dragCanvasBy.misPositionY);
-
     
+ 
+    // Bar size and spacing initialization
     let range = endIndex - startIndex;
     let availableSpacePerBar = canvasWidth / range;
     let barSpace = availableSpacePerBar / 3;
-    let barWidth = availableSpacePerBar - barSpace;
+    let barWidth = availableSpacePerBar - barSpace;   
 
-    let positionChangeOnX = dragCanvasBy.misPositionX;
-    let positionChangeOnY = dragCanvasBy.misPositionY;
-    let resultX = 0;
-    if (positionChangeOnX > availableSpacePerBar) {
-      resultX = Math.floor(positionChangeOnX / availableSpacePerBar);
-      console.log(resultX);
-    }
-    
-    startIndex -= resultX;
-
-    startIndex = Math.max(0, startIndex);
- 
+    // Based on canvas position recalculate the starting point and reassing the values
+    let startIndexModifier = calculateModifier(startIndex, availableSpacePerBar);
+    startIndex = dynamicStartIndex(startIndex, startIndexModifier);
+    range = endIndex - startIndex;
     let pivot = startIndex;
 
     let barTopY;
@@ -108,7 +86,7 @@ function drawTable(){
     for (let i = 0; i < range; i++) {
         let closePrice = currentDatas[pivot].closePrice;
         let openPrice = currentDatas[pivot].openPrice;
-        let barTopX = i * barWidth + barSpace * i + barSpace / 4;
+        let barTopX = - (startIndexModifier * availableSpacePerBar) + i * barWidth + barSpace * i + barSpace / 4;
         
         if (closePrice < openPrice){
             barTopY = - ((openPrice - chartMinValue) / ratio);
@@ -144,12 +122,17 @@ function drawTable(){
     }
 }
 
-function startIndexCalculation() {
-
+function dynamicStartIndex(startIndex, startIndexModifier) {
+    startIndex -= startIndexModifier;
+    startIndex = Math.max(0, startIndex);
+    return startIndex;
 }
 
-function endIndexCalculation() {
+function calculateModifier(startIndex, availableSpacePerBar) {
+    let startIndexModifier = Math.floor(canvasDragging.slidedPositionX / availableSpacePerBar);
+    startIndexModifier = Math.min(startIndexModifier, startIndex);
     
+    return startIndexModifier;
 }
 
 function calculateMin() {
@@ -174,19 +157,14 @@ function calculateMax(){
 
 function zoom(e){
     e.preventDefault();
-     //canvasZoom.width += (e.deltaY * -0.0001);
-    //canvasZoom.height += (e.deltaY * -0.0001); 
     mousePosition.x = e.offsetX;
     mousePosition.y = e.offsetY;
 
     if (e.deltaY > 0){
-        //canvasZoom.zoomValue -= 2; 
         zoomOutOfData();
     } else {
-         //canvasZoom.zoomValue += 2; 
         zoomOnData();
     }
-    //translateMouseToCanvas();
 
     drawTable();
 }
@@ -231,14 +209,14 @@ function zoomOutOfData() {
 
 function dragCanvas(e) {
     canvas.style.cursor = 'move';
-    dragCanvasBy.initialX = e.offsetX - dragCanvasBy.misPositionX;
-    dragCanvasBy.initialY = e.offsetY - dragCanvasBy.misPositionY;
+    canvasDragging.initialX = e.offsetX - canvasDragging.slidedPositionX;
+    canvasDragging.initialY = e.offsetY - canvasDragging.slidedPositionY;
     canvas.addEventListener('mousemove', updateCursorMovement);
 }
 
 function updateCursorMovement(e) {
-    dragCanvasBy.misPositionX = -(dragCanvasBy.initialX - e.offsetX);
-    dragCanvasBy.misPositionY = -(dragCanvasBy.initialY - e.offsetY);
+    canvasDragging.slidedPositionX = -(canvasDragging.initialX - e.offsetX);
+    canvasDragging.slidedPositionY = -(canvasDragging.initialY - e.offsetY);
     drawTable();
 }
 
@@ -248,19 +226,6 @@ function restoreCursor() {
     drawTable();
 }
 
-/* 
- function translateMouseToCanvas(){
-    let canvasMiddleX = canvas.width / 2;
-    let canvasMiddleY = canvas.height / 2;
-    translateFromMouse.x = - (canvasMiddleX - mousePosition.x) * canvasZoom.width / 4;
-    translateFromMouse.y = - (canvasMiddleY - mousePosition.y) * canvasZoom.width / 4;
-
-    if (canvasZoom.width === 1 && canvasZoom.height === 1) {
-        translateFromMouse.x = 0;
-        translateFromMouse.y = 0;
-
-    }
-}  */
 
 async function test(){
     currentDatas = await fetchStocks('richter', '2021-01-10', '2021-08-15');
