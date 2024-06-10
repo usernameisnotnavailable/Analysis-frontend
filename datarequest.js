@@ -61,10 +61,14 @@ function drawTable(){
     ctx.translate(0 + canvasDragging.slidedPositionX, canvasHeight + canvasDragging.slidedPositionY);
     let startIndex = viewRange.startIndex;
     let endIndex = viewRange.endIndex;
-    
+    let sidebarWidth = canvasWidth / 5;
+    let bottombarHeight = canvasHeight / 5;
+    let availableWidthForCandles = canvasWidth - sidebarWidth;
+    let availableHeightForCandles = canvasHeight - bottombarHeight;
+
     // Bar size and spacing initialization
     let range = endIndex - startIndex;
-    let availableSpacePerBar = canvasWidth / range;
+    let availableSpacePerBar = availableWidthForCandles / range;
     let barSpace = availableSpacePerBar / 3;
     let barWidth = availableSpacePerBar - barSpace;   
 
@@ -78,7 +82,7 @@ function drawTable(){
     range = endIndex - startIndex;
     let pivot = startIndex;
     // ratio: amount of huf per pixel Y axis
-    const ratio = (chartMaxValue - chartMinValue) / canvasHeight;
+    const ratio = (chartMaxValue - chartMinValue) / availableHeightForCandles;
     let barTopY;
     let barHeight;
     for (let i = 0; i < range; i++) {
@@ -87,12 +91,12 @@ function drawTable(){
         let barTopX = - (startIndexModifier * availableSpacePerBar) + i * barWidth + barSpace * i + barSpace / 4;
         
         if (closePrice < openPrice){
-            barTopY = - ((openPrice - chartMinValue) / ratio);
+            barTopY = - ((openPrice - chartMinValue) / ratio) - bottombarHeight;
             barHeight = (openPrice - closePrice) / ratio;
             ctx.fillStyle = 'red';
             ctx.strokeStyle = 'red';
         } else {
-            barTopY = - ((closePrice - chartMinValue) / ratio);
+            barTopY = - ((closePrice - chartMinValue) / ratio) - bottombarHeight;
             ctx.fillStyle = 'green';
             ctx.strokeStyle = 'green';
             barHeight = (closePrice - openPrice) / ratio;
@@ -104,14 +108,14 @@ function drawTable(){
         ctx.beginPath();
         let barMiddlePointX = (barTopX+(barTopX+barWidth)) / 2;
         let maxPrice = currentDatas[pivot].maxPrice;
-        let maxPricePointY = - ((maxPrice - chartMinValue) / ratio)
+        let maxPricePointY = - ((maxPrice - chartMinValue) / ratio) - bottombarHeight;
         ctx.moveTo(barMiddlePointX, barTopY);
         ctx.lineTo(barMiddlePointX, maxPricePointY);
         ctx.stroke();
   
         // drawline from bar to minprice
         let minPrice = currentDatas[pivot].minPrice;
-        let minPricePointY = -((minPrice - chartMinValue) / ratio);
+        let minPricePointY = -((minPrice - chartMinValue) / ratio) - bottombarHeight;
         ctx.moveTo(barMiddlePointX, barTopY + barHeight);
         ctx.lineTo(barMiddlePointX, minPricePointY);
         ctx.stroke();
