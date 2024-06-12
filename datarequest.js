@@ -65,6 +65,7 @@ function drawTable(){
     let bottombarHeight = canvasHeight / 5;
     let availableWidthForCandles = canvasWidth - sidebarWidth;
     let availableHeightForCandles = canvasHeight - bottombarHeight;
+    let bottombarWidth = canvasWidth - sidebarWidth;
 
     // Bar size and spacing initialization
     let range = endIndex - startIndex;
@@ -85,11 +86,15 @@ function drawTable(){
     const ratio = (chartMaxValue - chartMinValue) / availableHeightForCandles;
     let barTopY;
     let barHeight;
+    let date;
+    let dateDrawStart = 10;
+    let dateDrawEnd = 0;
+    let dateSpace = bottombarWidth / 8;
     for (let i = 0; i < range; i++) {
         let closePrice = currentDatas[pivot].closePrice;
         let openPrice = currentDatas[pivot].openPrice;
         let barTopX = - (startIndexModifier * availableSpacePerBar) + i * barWidth + barSpace * i + barSpace / 4;
-        
+
         if (closePrice < openPrice){
             barTopY = - ((openPrice - chartMinValue) / ratio) - bottombarHeight;
             barHeight = (openPrice - closePrice) / ratio;
@@ -112,16 +117,33 @@ function drawTable(){
         ctx.moveTo(barMiddlePointX, barTopY);
         ctx.lineTo(barMiddlePointX, maxPricePointY);
         ctx.stroke();
-  
+        
         // drawline from bar to minprice
         let minPrice = currentDatas[pivot].minPrice;
         let minPricePointY = -((minPrice - chartMinValue) / ratio) - bottombarHeight;
         ctx.moveTo(barMiddlePointX, barTopY + barHeight);
         ctx.lineTo(barMiddlePointX, minPricePointY);
         ctx.stroke();
-    
+        
+        // drawDate(ctx, startIndex, endIndex, range, bottombarWidth);
+        ctx.fillStyle = 'black';
+        if (barTopX > dateDrawEnd) {
+          date = new Date(currentDatas[pivot].tradeDate);
+          date = month(date.getMonth());
+          ctx.fillText(date, barTopX, -10, 10);
+          console.log('dateSpace ' + dateSpace);
+          dateDrawEnd = barTopX + dateSpace + 10;
+          console.log('dateDrawEnd ' + dateDrawEnd);
+        }
+        
+        
         pivot++;
     }
+}
+
+function drawDate(ctx, startIndex, endIndex, range, bottombarWidth) {
+    
+  
 }
 
 function dynamicStartIndex(startIndex, startIndexModifier) {
@@ -248,3 +270,34 @@ async function test(){
 }
 
 test();
+
+
+
+function month(date) {
+  switch (date) {
+    case 0:
+      return 'Jan';
+    case 1:
+      return 'Feb';
+    case 2:
+      return 'Mar';
+    case 3:
+      return 'Apr';
+    case 4:
+      return 'May';
+    case 5:
+      return 'Jun';
+    case 6:
+      return 'Jul';
+    case 7:
+      return 'Aug';
+    case 8:
+      return 'Sept';
+    case 9:
+      return 'Okt';
+    case 10:
+      return 'Nov';
+    case 11:
+      return 'Dec';
+  }
+}
