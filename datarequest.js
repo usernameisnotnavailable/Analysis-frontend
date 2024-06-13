@@ -17,9 +17,22 @@ let viewRange = {
 };
 let chartMinValue;
 let chartMaxValue;
-const canvas = document.getElementById('myChart');
+const canvas = document.getElementById('stock-chart');
+const dateBar = document.getElementById('date-bar');
+const priceBar = document.getElementById('price-bar');
+const form = document.getElementById('data-request-form');
+let canvasHeight =
+  document.documentElement.clientHeight -
+  form.offsetHeight -
+  dateBar.offsetHeight;
 let canvasWidth = canvas.offsetWidth;
-let canvasHeight = canvas.offsetHeight;
+console.log('document.documentElement.clientHeight ' + document.documentElement.clientHeight);
+  console.log('form.offsetHeight ' + form.offsetHeight);
+console.log('dateBar.offsetHeight ' + dateBar.offsetHeight);
+  console.log('canvasHeight ' + canvasHeight);
+dateBar.width = canvasWidth;
+priceBar.height = canvasHeight;
+
 const submitBtn = document.getElementById('submit-btn');
 const testText = document.getElementById('test');
 
@@ -29,8 +42,12 @@ canvas.addEventListener('mousedown', dragCanvas);
 canvas.addEventListener('mouseup', restoreCursor);
 
 window.addEventListener('resize', () => {
-    canvasWidth = canvas.offsetWidth;
-    canvasHeight = canvas.offsetHeight;
+  canvasHeight =
+    document.documentElement.clientHeight -
+    form.offsetHeight -
+    dateBar.offsetHeight;
+  canvasWidth = canvas.offsetWidth;
+  drawTable();
 }); 
 
 async function fetchStocks(stockname, from, to){
@@ -56,6 +73,7 @@ function drawTable(){
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 1;
     ctx.save();
+    console.log(canvasHeight);
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
     ctx.translate(0 + canvasDragging.slidedPositionX, canvasHeight + canvasDragging.slidedPositionY);
@@ -69,7 +87,7 @@ function drawTable(){
 
     // Bar size and spacing initialization
     let range = endIndex - startIndex;
-    let availableSpacePerBar = availableWidthForCandles / range;
+    let availableSpacePerBar = canvasWidth / range;
     let barSpace = availableSpacePerBar / 3;
     let barWidth = availableSpacePerBar - barSpace;   
 
@@ -83,29 +101,32 @@ function drawTable(){
     range = endIndex - startIndex;
     let pivot = startIndex;
     // ratio: amount of huf per pixel Y axis
-    const ratio = (chartMaxValue - chartMinValue) / availableHeightForCandles;
+    const ratio = (chartMaxValue - chartMinValue) / canvasHeight;
     let barTopY;
     let barHeight;
+
     let date;
     let dateDrawStart = 10;
-    let dateDrawEnd = 0;
+    let dateDrawEnd = -10000;
+    let lastDate;
     let dateSpace = bottombarWidth / 8;
     for (let i = 0; i < range; i++) {
         let closePrice = currentDatas[pivot].closePrice;
         let openPrice = currentDatas[pivot].openPrice;
         let barTopX = - (startIndexModifier * availableSpacePerBar) + i * barWidth + barSpace * i + barSpace / 4;
-
+        ctx.restore();
         if (closePrice < openPrice){
-            barTopY = - ((openPrice - chartMinValue) / ratio) - bottombarHeight;
+            barTopY = -((openPrice - chartMinValue) / ratio);
             barHeight = (openPrice - closePrice) / ratio;
             ctx.fillStyle = 'red';
             ctx.strokeStyle = 'red';
         } else {
-            barTopY = - ((closePrice - chartMinValue) / ratio) - bottombarHeight;
+            barTopY = -((closePrice - chartMinValue) / ratio);
             ctx.fillStyle = 'green';
             ctx.strokeStyle = 'green';
             barHeight = (closePrice - openPrice) / ratio;
         }
+        ctx.save();
         // draw bar
         ctx.fillRect(barTopX, barTopY, barWidth, barHeight);
                   
@@ -113,38 +134,50 @@ function drawTable(){
         ctx.beginPath();
         let barMiddlePointX = (barTopX+(barTopX+barWidth)) / 2;
         let maxPrice = currentDatas[pivot].maxPrice;
-        let maxPricePointY = - ((maxPrice - chartMinValue) / ratio) - bottombarHeight;
+        let maxPricePointY =
+          -((maxPrice - chartMinValue) / ratio);
         ctx.moveTo(barMiddlePointX, barTopY);
         ctx.lineTo(barMiddlePointX, maxPricePointY);
         ctx.stroke();
         
         // drawline from bar to minprice
         let minPrice = currentDatas[pivot].minPrice;
-        let minPricePointY = -((minPrice - chartMinValue) / ratio) - bottombarHeight;
+        let minPricePointY = -((minPrice - chartMinValue) / ratio);
         ctx.moveTo(barMiddlePointX, barTopY + barHeight);
         ctx.lineTo(barMiddlePointX, minPricePointY);
         ctx.stroke();
         
-        // drawDate(ctx, startIndex, endIndex, range, bottombarWidth);
-        ctx.fillStyle = 'black';
-        if (barTopX > dateDrawEnd) {
-          date = new Date(currentDatas[pivot].tradeDate);
-          date = month(date.getMonth());
-          ctx.fillText(date, barTopX, -10, 10);
-          console.log('dateSpace ' + dateSpace);
-          dateDrawEnd = barTopX + dateSpace + 10;
-          console.log('dateDrawEnd ' + dateDrawEnd);
-        }
+        
+
         
         
         pivot++;
     }
 }
 
-function drawDate(ctx, startIndex, endIndex, range, bottombarWidth) {
-    
-  
+function drawDates() {
+    const ctxBottom = dateBar.getContext('2d');
+    ctxBottom.fillStyle = 'black';
+
+    let displayDate;
+    if (barTopX > dateDrawEnd) {
+        let currentDate = new Date(currentDatas[pivot].tradeDate);
+
+        if (lastDate == null || lastDate.getMonth() != currentDate.getMonth()) {
+            displayDate = month(currentDate.getMonth());
+        } else {
+            displayDate = currentDate.getDate();
+        }
+        console.log(currentDatas[pivot]);
+
+        lastDate = currentDate;
+
+        //ctx.font = "20px Georgia";
+        ctxBottom.fillText(displayDate, barTopX, -10);
+        dateDrawEnd = barTopX + dateSpace + 10;
+    }
 }
+
 
 function dynamicStartIndex(startIndex, startIndexModifier) {
     startIndex -= startIndexModifier;

@@ -8,7 +8,6 @@
 </head>
 <body>
 
-<h1>Stocks</h1>
 <form id="data-request-form">
     <label for="stock-name">Please input stock name:</label>
     <input type="text" id="stock-name" name="stockname" required>
@@ -18,10 +17,12 @@
     <input type="date" id="date-to" name="to">
     <button type="submit" id="submit-btn">Submit</button>
 </form>
-<h1 id="test"></h1>
 <div class="chart-holder">
-<canvas id="myChart"></canvas>
+<canvas id="stock-chart"></canvas>
+<canvas id="price-bar"></canvas>
+<canvas id="date-bar"></canvas>
 </div>
+
 <script src="datarequest.js"></script>
 </body>
 </html>
