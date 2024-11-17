@@ -1,12 +1,12 @@
-.body{
+.body {
     display: flex;
 }
 
-body{
+body {
     margin: 0px;
 }
 
-.chart-holder{
+.chart-holder {
     display: grid;
     grid-template-columns: 85% 15%;
     grid-template-rows: 85% 15%;
@@ -16,20 +16,19 @@ body{
     margin: 0;
 }
 
-#stock-chart{
+#stock-chart {
     width: 100%;
     height: 100%;
     margin: 0;
 }
-/* #price-bar {
+
+#price-bar,
+#date-bar {
     height: 100%;
     width: 100%;
     margin: 0;
 }
 
-#date-bar{
+#price-bar {
     display: flex;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-} */
+}

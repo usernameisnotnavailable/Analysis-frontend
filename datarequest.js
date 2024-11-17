@@ -1,5 +1,7 @@
+
+
 async function test() {
-  currentDatas = await fetchStocks('richter', '2021-01-10', '2021-08-15');
+  currentDatas = await fetchStocks('richter', '2021-01-10', '2022-08-15');
   viewRange.endIndex = currentDatas.length;
   chartMinValue = calculateMin();
   chartMaxValue = calculateMax();
@@ -23,7 +25,6 @@ let chartMinValue;
 let chartMaxValue;
 
 const submitBtn = document.getElementById('submit-btn');
-const testText = document.getElementById('test');
 const canvas = document.getElementById('stock-chart');
 const dateBar = document.getElementById('date-bar');
 const priceBar = document.getElementById('price-bar');
@@ -62,6 +63,22 @@ window.addEventListener('resize', () => {
   drawTable();
 });
 
+
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sept',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+
 async function fetchStocks(stockname, from, to) {
   const response = await fetch(
     `http://localhost:8080/stocks?stock=${stockname}&from=${from}&to=${to}`
@@ -89,10 +106,7 @@ function drawTable() {
   ctx.lineWidth = 1;
 
   ctx.save();
-  ctx.translate(
-    0 + canvasDragging.slidedPositionX,
-    canvas.height + canvasDragging.slidedPositionY
-  );
+  ctx.translate(canvasDragging.slidedPositionX, canvas.height + canvasDragging.slidedPositionY);
   let startIndex = viewRange.startIndex;
   let endIndex = viewRange.endIndex;
 
@@ -121,7 +135,7 @@ function drawTable() {
   const ratio = (chartMaxValue - chartMinValue) / canvas.height;
   let barTopY;
   let barHeight;
-    const dateAndPositions = new Map();
+  const dateAndPositions = new Map();
 
   clearDate();
 
@@ -165,71 +179,94 @@ function drawTable() {
     ctx.lineTo(barMiddlePointX, minPricePointY);
     ctx.stroke();
 
-    // drawDate(barMiddlePointX, pivot);
+    //drawDate(barMiddlePointX, pivot);
     dateAndPositions.set(currentDatas[pivot].tradeDate, barMiddlePointX);
 
     pivot++;
   }
-    ctx.restore();
-    drawDates(dateAndPositions);
+  ctx.restore();
+  drawDates(dateAndPositions);
 }
 
-function drawDates(dateAndPositions) {
-    const ctxBottom = dateBar.getContext('2d');
-    ctxBottom.save();
-    ctxBottom.translate(0 + canvasDragging.slidedPositionX, 0);
-    ctxBottom.fillStyle = 'black';
-    ctxBottom.font = '20px Arial';
-    
-  
-
-    // max text size is 50px;
-    // days 22 pixel
-
-    let maxPlaceableDate = dateBar.width / 100;
-    console.log('maxPlaceableDate ' + maxPlaceableDate);
-   
-    let totalDateCount = dateAndPositions.size;
-    console.log('totalDateCount ' + totalDateCount);
-
-    let datesGrouped = totalDateCount / maxPlaceableDate;
-    console.log('datesGrouped ' + datesGrouped);
-
-    let lastPlaced = 0;
-    for (const date of dateAndPositions.keys()) {
-
-        let datePositionX = dateAndPositions.get(date);
-        
-        let displayDate = new Date(date).getDate();
-        const textWidth = ctxBottom.measureText(displayDate).width;
-        console.log('textWidth ' + textWidth);
-        ctxBottom.fillText(displayDate, datePositionX - textWidth / 2, 40);
-        
-
-    }
-
-
-    //console.log(textWidth);
-    
-
-    ctxBottom.restore();
-    
-}
-
-function drawDate(barMiddlePointX, pivot) {
+function drawDates(datesAndPositions) {
   const ctxBottom = dateBar.getContext('2d');
   ctxBottom.save();
-  ctxBottom.translate(0 + canvasDragging.slidedPositionX, 0);
+  ctxBottom.translate(canvasDragging.slidedPositionX, 0);
   ctxBottom.fillStyle = 'black';
+  ctxBottom.font = '22px Arial';
+  ctxBottom.textBaseline = 'middle';
 
-  let displayDate;
-  let currentDate = new Date(currentDatas[pivot].tradeDate);
-  displayDate = currentDate.getDate();
+  const textPlaceHolder = 100;
+  const displayWindow = dateBar.width;
+  console.log('displayWindow: ' + displayWindow);
+  const totalDateCount = datesAndPositions.size;
+  console.log('totalDateCount: ' + totalDateCount);
+  const sections = Math.floor(displayWindow / textPlaceHolder) - 1;
+  console.log('sections: ' + sections);
 
-  ctxBottom.font = '20px Arial';
-  const textWidth = ctxBottom.measureText(displayDate).width;
-  ctxBottom.fillText(displayDate, barMiddlePointX - textWidth / 2, 40);
+  let lastDisplayedDate = new Date(1000, 0, 1);
+
+  const filteredPositions = getDatesAndPositions(datesAndPositions, displayWindow);
+
+  for(const [date, position] of filteredPositions) {
+    console.log('date: ' + date + ' position: ' + position);
+    const currentDate = new Date(date);
+    const day = currentDate.getDate();
+    const month = months[currentDate.getMonth()];
+    const year = currentDate.getFullYear();
+    console.log('date: ' + date);
+    console.log('position: ' + position);
+    if (lastDisplayedDate.getFullYear() !== year) {
+      drawYear(ctxBottom, year, position);
+      lastDisplayedDate = currentDate;
+    } else if (lastDisplayedDate.getMonth() !== currentDate.getMonth()) {
+      drawMonth(ctxBottom, month, position);
+      lastDisplayedDate = currentDate;
+    } else if (lastDisplayedDate.getDate() !== day) {
+      drawDay(ctxBottom, day, position);
+      lastDisplayedDate = currentDate;
+    }
+  }
+
+
   ctxBottom.restore();
+}
+
+function drawDay(ctx, day, posX) {
+  const textWidth = ctx.measureText(day).width;
+  ctx.fillText(day, posX - textWidth / 2, 40);
+}
+
+function drawMonth(ctx, month, posX) {
+  const textWidth = ctx.measureText(month).width;
+  ctx.fillText(month, posX - textWidth / 2, 40);
+}
+
+function drawYear(ctx, year, posX) {
+  const textWidth = ctx.measureText(year).width;
+  ctx.fillText(year, posX - textWidth / 2, 40);
+}
+
+function getDatesAndPositions(datesAndPositions, displayWindow) {
+  let filteredPositions = new Map();
+  let counter = 1;
+  let thisPosition;
+  let thisDate;
+  for (const [date, position] of datesAndPositions) {
+      if (position + canvasDragging.slidedPositionX > counter * 100) {
+        thisPosition = counter * 100;
+        thisDate = date;
+        console.log('thisDate: ' + thisDate + ' thisPosition: ' + thisPosition);
+        filteredPositions.set(thisDate, thisPosition);
+        counter++;
+      }
+      if ((counter * 100) + 50 > displayWindow) {
+        break;
+      }
+  }
+
+  return filteredPositions;
+
 }
 
 function clearDate() {
@@ -251,10 +288,9 @@ function calculateStartIndexVisibility(startIndex, availableSpacePerBar) {
 }
 
 function calculateEndIndexVisibility(range, availableSpacePerBar) {
-  let endIndexModifier = Math.floor(
-    (canvas.width - range * availableSpacePerBar) / availableSpacePerBar
+  return Math.floor(
+      (canvas.width - range * availableSpacePerBar) / availableSpacePerBar
   );
-  return endIndexModifier;
 }
 
 function dynamicEndIndex(endIndex, endIndexModifier) {
@@ -297,9 +333,9 @@ function zoom(e) {
 }
 
 function zoomOnData() {
-  if (mousePosition.x < canvas.width / 3) {
+  if (mousePosition.x < canvas.width/ 3) {
     viewRange.endIndex--;
-  } else if (mousePosition.x > (canvas.width / 3) * 2) {
+  } else if (mousePosition.x > (canvas.width/ 3) * 2) {
     viewRange.startIndex++;
   } else {
     viewRange.endIndex--;
@@ -353,21 +389,4 @@ function restoreCursor() {
   drawTable();
 }
 
-function month(date) {
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sept',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
 
-  return months[date] || '';
-}
