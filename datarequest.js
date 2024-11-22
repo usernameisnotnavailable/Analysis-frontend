@@ -1,5 +1,4 @@
 
-
 async function test() {
   currentDatas = await fetchStocks('richter', '2021-01-10', '2022-08-15');
   viewRange.endIndex = currentDatas.length;
@@ -209,21 +208,21 @@ function drawDates(datesAndPositions) {
   const filteredPositions = getDatesAndPositions(datesAndPositions, displayWindow);
 
   for(const [date, position] of filteredPositions) {
-    console.log('date: ' + date + ' position: ' + position);
     const currentDate = new Date(date);
     const day = currentDate.getDate();
     const month = months[currentDate.getMonth()];
     const year = currentDate.getFullYear();
-    console.log('date: ' + date);
-    console.log('position: ' + position);
+    let draggedPosition =  position;
+
+
     if (lastDisplayedDate.getFullYear() !== year) {
-      drawYear(ctxBottom, year, position);
+      drawYear(ctxBottom, year, draggedPosition);
       lastDisplayedDate = currentDate;
     } else if (lastDisplayedDate.getMonth() !== currentDate.getMonth()) {
-      drawMonth(ctxBottom, month, position);
+      drawMonth(ctxBottom, month, draggedPosition);
       lastDisplayedDate = currentDate;
     } else if (lastDisplayedDate.getDate() !== day) {
-      drawDay(ctxBottom, day, position);
+      drawDay(ctxBottom, day, draggedPosition);
       lastDisplayedDate = currentDate;
     }
   }
@@ -250,14 +249,18 @@ function drawYear(ctx, year, posX) {
 function getDatesAndPositions(datesAndPositions, displayWindow) {
   let filteredPositions = new Map();
   let counter = 1;
-  let thisPosition;
+  let draggedPosition;
   let thisDate;
   for (const [date, position] of datesAndPositions) {
       if (position + canvasDragging.slidedPositionX > counter * 100) {
-        thisPosition = counter * 100;
-        thisDate = date;
-        console.log('thisDate: ' + thisDate + ' thisPosition: ' + thisPosition);
-        filteredPositions.set(thisDate, thisPosition);
+        draggedPosition = counter * 100 - canvasDragging.slidedPositionX;
+
+        // difference check added to remove dates that are far from their respective bars
+        if(position - draggedPosition <= 50) {
+          thisDate = date;
+          filteredPositions.set(thisDate, draggedPosition);
+        }
+
         counter++;
       }
       if ((counter * 100) + 50 > displayWindow) {
@@ -388,5 +391,3 @@ function restoreCursor() {
   canvas.removeEventListener('mousemove', updateCursorMovement);
   drawTable();
 }
-
-
