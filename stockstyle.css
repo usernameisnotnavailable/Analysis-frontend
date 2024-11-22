@@ -1,15 +1,34 @@
-.body{
+.body {
     display: flex;
 }
 
-.chart-holder{
-    display: flex;
-    width: 80%;
-    margin-right: 10%;
-    margin-left: 10%;
-    border: 1px solid black;    
+body {
+    margin: 0px;
 }
 
-#myChart{
+.chart-holder {
+    display: grid;
+    grid-template-columns: 85% 15%;
+    grid-template-rows: 85% 15%;
+}
+
+#data-request-form {
+    margin: 0;
+}
+
+#stock-chart {
     width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+#price-bar,
+#date-bar {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+}
+
+#price-bar {
+    display: flex;
 }
