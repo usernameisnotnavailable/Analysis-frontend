@@ -189,16 +189,27 @@ function drawPrice() {
     ctxRight.fillStyle = 'black';
     ctxRight.font = '22px Arial';
     ctxRight.textBaseline = 'middle';
+    console.log("chartMin: " + chartMinValue);
+    console.log("chartMax: " + chartMaxValue);
     //ctxRight.textAlign = 'right';
     // total range
     const range = chartMaxValue - chartMinValue;
+    const reservedTextHeight = 60;
+    const spaceForEachLabel = Math.round(canvas.height / reservedTextHeight);
 
+    let priceStep = range / spaceForEachLabel;
+    console.log("priceStep: " + priceStep);
+    let roundingDigits = Math.pow(10, (Math.round(priceStep).toString().length - 1));
+    console.log("digits: " + (Math.round(priceStep).toString().length - 1));
+    console.log("roundingDigits: " + roundingDigits);
+    let roundedPrice = Math.round(priceStep  / roundingDigits) * roundingDigits;
+    console.log("roundedPrice: " + roundedPrice);
+    console.log("canvas height: " + canvas.height);
     const ratio = canvas.height / range;
-    const priceStep = range / 10;
+    let startingValue = Math.round(chartMinValue  / roundingDigits) * roundingDigits;
     for (let i = 0; i < 10; i++) {
-        let price = chartMinValue + priceStep * i;
-        console.log(price);
-        let position = canvas.height - (i * priceStep * ratio);
+        let price = startingValue + roundedPrice * i;
+        let position = canvas.height - (i * roundedPrice * ratio);
         ctxRight.fillText(price, 100, position);
     }
 
