@@ -30,16 +30,16 @@ const priceBar = document.getElementById('price-bar');
 const form = document.getElementById('data-request-form');
 
 canvas.height =
-  document.documentElement.clientHeight -
-  form.offsetHeight -
-  dateBar.offsetHeight;
+    document.documentElement.clientHeight -
+    form.offsetHeight -
+    dateBar.offsetHeight;
 
 canvas.width = canvas.offsetWidth;
 dateBar.width = canvas.width;
 dateBar.height =
-  document.documentElement.clientHeight -
-  canvas.offsetHeight -
-  form.offsetHeight;
+    document.documentElement.clientHeight -
+    canvas.offsetHeight -
+    form.offsetHeight;
 priceBar.height = canvas.height;
 
 submitBtn.addEventListener('click', requestData);
@@ -47,21 +47,8 @@ canvas.addEventListener('wheel', zoom);
 canvas.addEventListener('mousedown', dragCanvas);
 canvas.addEventListener('mouseup', restoreCursor);
 window.addEventListener('resize', () => {
-  canvas.width = canvas.offsetWidth;
-  dateBar.width = canvas.width;
-  dateBar.height =
-    document.documentElement.clientHeight -
-    canvas.offsetHeight -
-    form.offsetHeight;
-  priceBar.height = canvas.height;
-  canvas.height =
-    document.documentElement.offsetHeight -
-    form.offsetHeight -
-    dateBar.offsetHeight;
-
   drawTable();
 });
-
 
   const months = [
     'Jan',
@@ -141,22 +128,25 @@ function drawTable() {
   for (let i = 0; i < range; i++) {
     let closePrice = currentDatas[pivot].closePrice;
     let openPrice = currentDatas[pivot].openPrice;
-    let barTopX =
-      -(startIndexModifier * availableSpacePerBar) +
-      i * barWidth +
-      barSpace * i +
-      barSpace / 4;
+    // barTopX: distance from the left of the canvas to the left of the bar
+    let barTopX = -(startIndexModifier * availableSpacePerBar) + i * barWidth + barSpace * i + barSpace / 4;
 
+    // color and starting position based on close and open price difference
     if (closePrice < openPrice) {
+      // barTopY: distance from the top of the canvas to the top of the bar
       barTopY = -((openPrice - chartMinValue) / ratio);
+      // barHeight: height of the bar
       barHeight = (openPrice - closePrice) / ratio;
       ctx.fillStyle = 'red';
       ctx.strokeStyle = 'red';
     } else {
+      // barTopY: distance from the top of the canvas to the top of the bar
       barTopY = -((closePrice - chartMinValue) / ratio);
+      // barHeight: height of the bar
+      barHeight = (closePrice - openPrice) / ratio;
       ctx.fillStyle = 'green';
       ctx.strokeStyle = 'green';
-      barHeight = (closePrice - openPrice) / ratio;
+
     }
 
     // draw bar
@@ -178,13 +168,41 @@ function drawTable() {
     ctx.lineTo(barMiddlePointX, minPricePointY);
     ctx.stroke();
 
-    //drawDate(barMiddlePointX, pivot);
+
     dateAndPositions.set(currentDatas[pivot].tradeDate, barMiddlePointX);
 
     pivot++;
   }
   ctx.restore();
   drawDates(dateAndPositions);
+  drawPrice();
+}
+
+function drawPrice() {
+    const ctxRight = priceBar.getContext('2d');
+    ctxRight.clearRect(0, 0, priceBar.width, priceBar.height);
+    ctxRight.fillStyle = 'grey';
+    ctxRight.fillRect(0, 0, priceBar.width, priceBar.height);
+
+    ctxRight.save();
+    ctxRight.translate(0, canvasDragging.slidedPositionY);
+    ctxRight.fillStyle = 'black';
+    ctxRight.font = '22px Arial';
+    ctxRight.textBaseline = 'middle';
+    //ctxRight.textAlign = 'right';
+    // total range
+    const range = chartMaxValue - chartMinValue;
+
+    const ratio = canvas.height / range;
+    const priceStep = range / 10;
+    for (let i = 0; i < 10; i++) {
+        let price = chartMinValue + priceStep * i;
+        console.log(price);
+        let position = canvas.height - (i * priceStep * ratio);
+        ctxRight.fillText(price, 100, position);
+    }
+
+    ctxRight.restore();
 }
 
 function drawDates(datesAndPositions) {
@@ -197,11 +215,9 @@ function drawDates(datesAndPositions) {
 
   const textPlaceHolder = 100;
   const displayWindow = dateBar.width;
-  console.log('displayWindow: ' + displayWindow);
   const totalDateCount = datesAndPositions.size;
-  console.log('totalDateCount: ' + totalDateCount);
   const sections = Math.floor(displayWindow / textPlaceHolder) - 1;
-  console.log('sections: ' + sections);
+
 
   let lastDisplayedDate = new Date(1000, 0, 1);
 
@@ -226,7 +242,6 @@ function drawDates(datesAndPositions) {
       lastDisplayedDate = currentDate;
     }
   }
-
 
   ctxBottom.restore();
 }
