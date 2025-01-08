@@ -1,6 +1,6 @@
 
 async function test() {
-  currentDatas = await fetchStocks('richter', '2021-01-10', '2022-08-15');
+  currentDatas = await fetchStocks('MOL', '2022-04-10', '2024-05-10');
   viewRange.endIndex = currentDatas.length;
   chartMinValue = calculateMin();
   chartMaxValue = calculateMax();
@@ -22,7 +22,7 @@ let canvasDragging = {
 let viewRange = { startIndex: 0, endIndex: 0 };
 let chartMinValue;
 let chartMaxValue;
-
+let barsBackgroundColor = 'lightgreen';
 const submitBtn = document.getElementById('submit-btn');
 const canvas = document.getElementById('stock-chart');
 const dateBar = document.getElementById('date-bar');
@@ -181,7 +181,7 @@ function drawTable() {
 function drawPrice() {
     const ctxRight = priceBar.getContext('2d');
     ctxRight.clearRect(0, 0, priceBar.width, priceBar.height);
-    ctxRight.fillStyle = 'grey';
+    ctxRight.fillStyle = barsBackgroundColor;
     ctxRight.fillRect(0, 0, priceBar.width, priceBar.height);
 
     ctxRight.save();
@@ -189,8 +189,6 @@ function drawPrice() {
     ctxRight.fillStyle = 'black';
     ctxRight.font = '22px Arial';
     ctxRight.textBaseline = 'middle';
-    console.log("chartMin: " + chartMinValue);
-    console.log("chartMax: " + chartMaxValue);
     //ctxRight.textAlign = 'right';
     // total range
     const range = chartMaxValue - chartMinValue;
@@ -198,13 +196,8 @@ function drawPrice() {
     const spaceForEachLabel = Math.round(canvas.height / reservedTextHeight);
 
     let priceStep = range / spaceForEachLabel;
-    console.log("priceStep: " + priceStep);
     let roundingDigits = Math.pow(10, (Math.round(priceStep).toString().length - 1));
-    console.log("digits: " + (Math.round(priceStep).toString().length - 1));
-    console.log("roundingDigits: " + roundingDigits);
     let roundedPrice = Math.round(priceStep  / roundingDigits) * roundingDigits;
-    console.log("roundedPrice: " + roundedPrice);
-    console.log("canvas height: " + canvas.height);
     const ratio = canvas.height / range;
     let startingValue = Math.round(chartMinValue  / roundingDigits) * roundingDigits;
     for (let i = 0; i < 10; i++) {
@@ -300,7 +293,7 @@ function getDatesAndPositions(datesAndPositions, displayWindow) {
 
 function clearDate() {
   const ctxBottom = dateBar.getContext('2d');
-  ctxBottom.fillStyle = 'grey';
+  ctxBottom.fillStyle = barsBackgroundColor;
   ctxBottom.fillRect(0, 0, dateBar.width, dateBar.height);
 }
 
