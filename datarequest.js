@@ -47,6 +47,17 @@ canvas.addEventListener('wheel', zoom);
 canvas.addEventListener('mousedown', dragCanvas);
 canvas.addEventListener('mouseup', restoreCursor);
 window.addEventListener('resize', () => {
+  canvas.height =
+      document.documentElement.clientHeight -
+      form.offsetHeight -
+      dateBar.offsetHeight;
+  canvas.width = canvas.offsetWidth;
+  dateBar.width = canvas.width;
+  dateBar.height =
+      document.documentElement.clientHeight -
+      canvas.offsetHeight -
+      form.offsetHeight;
+  priceBar.height = canvas.height;
   drawTable();
 });
 
