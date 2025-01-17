@@ -1,4 +1,3 @@
-
 async function test() {
   currentDatas = await fetchStocks('MOL', '2022-04-10', '2024-05-10');
   viewRange.endIndex = currentDatas.length;
@@ -28,36 +27,16 @@ const canvas = document.getElementById('stock-chart');
 const dateBar = document.getElementById('date-bar');
 const priceBar = document.getElementById('price-bar');
 const form = document.getElementById('data-request-form');
+updateCanvasesSize();
 
-canvas.height =
-    document.documentElement.clientHeight -
-    form.offsetHeight -
-    dateBar.offsetHeight;
-
-canvas.width = canvas.offsetWidth;
-dateBar.width = canvas.width;
-dateBar.height =
-    document.documentElement.clientHeight -
-    canvas.offsetHeight -
-    form.offsetHeight;
-priceBar.height = canvas.height;
 
 submitBtn.addEventListener('click', requestData);
 canvas.addEventListener('wheel', zoom);
 canvas.addEventListener('mousedown', dragCanvas);
 canvas.addEventListener('mouseup', restoreCursor);
+
 window.addEventListener('resize', () => {
-  canvas.height =
-      document.documentElement.clientHeight -
-      form.offsetHeight -
-      dateBar.offsetHeight;
-  canvas.width = canvas.offsetWidth;
-  dateBar.width = canvas.width;
-  dateBar.height =
-      document.documentElement.clientHeight -
-      canvas.offsetHeight -
-      form.offsetHeight;
-  priceBar.height = canvas.height;
+  updateCanvasesSize();
   drawTable();
 });
 
@@ -420,4 +399,12 @@ function restoreCursor() {
   canvas.style.cursor = 'auto';
   canvas.removeEventListener('mousemove', updateCursorMovement);
   drawTable();
+}
+
+function updateCanvasesSize(){
+  canvas.height = document.documentElement.clientHeight - form.offsetHeight - dateBar.offsetHeight;
+  canvas.width = canvas.offsetWidth;
+  dateBar.width = canvas.width;
+  dateBar.height = document.documentElement.clientHeight - canvas.offsetHeight - form.offsetHeight;
+  priceBar.height = canvas.height;
 }
