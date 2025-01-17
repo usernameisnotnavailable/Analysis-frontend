@@ -80,7 +80,6 @@ function drawTable() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.strokeStyle = 'black';
   ctx.lineWidth = 1;
-
   ctx.save();
   ctx.translate(canvasDragging.slidedPositionX, canvas.height + canvasDragging.slidedPositionY);
   let startIndex = viewRange.startIndex;
@@ -173,27 +172,28 @@ function drawPrice() {
     ctxRight.clearRect(0, 0, priceBar.width, priceBar.height);
     ctxRight.fillStyle = barsBackgroundColor;
     ctxRight.fillRect(0, 0, priceBar.width, priceBar.height);
-
     ctxRight.save();
     ctxRight.translate(0, canvasDragging.slidedPositionY);
     ctxRight.fillStyle = 'black';
-    ctxRight.font = '22px Arial';
-    ctxRight.textBaseline = 'middle';
     //ctxRight.textAlign = 'right';
     // total range
     const range = chartMaxValue - chartMinValue;
-    const reservedTextHeight = 60;
+    const fontSize = Math.max(20, canvas.height / 15);
+    const reservedTextHeight = 70;
     const spaceForEachLabel = Math.round(canvas.height / reservedTextHeight);
-
+    ctxRight.font = `${fontSize}px Arial`;
     let priceStep = range / spaceForEachLabel;
     let roundingDigits = Math.pow(10, (Math.round(priceStep).toString().length - 1));
     let roundedPrice = Math.round(priceStep  / roundingDigits) * roundingDigits;
     const ratio = canvas.height / range;
     let startingValue = Math.round(chartMinValue  / roundingDigits) * roundingDigits;
-    for (let i = 0; i < 10; i++) {
+    for (let i = -10; i < 20; i++) {
         let price = startingValue + roundedPrice * i;
         let position = canvas.height - (i * roundedPrice * ratio);
-        ctxRight.fillText(price, 100, position);
+      if (position < canvas.height - canvasDragging.slidedPositionY) {
+        ctxRight.fillText(price, 0, position);
+      }
+
     }
 
     ctxRight.restore();
@@ -203,15 +203,16 @@ function drawDates(datesAndPositions) {
   const ctxBottom = dateBar.getContext('2d');
   ctxBottom.save();
   ctxBottom.translate(canvasDragging.slidedPositionX, 0);
+  const fontSize = Math.max(20, canvas.width / 50);
   ctxBottom.fillStyle = 'black';
-  ctxBottom.font = '22px Arial';
+  ctxBottom.font = `${fontSize}px Arial`;
+  //ctxBottom.font = '20px Arial';
   ctxBottom.textBaseline = 'middle';
 
   const textPlaceHolder = 100;
   const displayWindow = dateBar.width;
   const totalDateCount = datesAndPositions.size;
   const sections = Math.floor(displayWindow / textPlaceHolder) - 1;
-
 
   let lastDisplayedDate = new Date(1000, 0, 1);
 
@@ -242,17 +243,17 @@ function drawDates(datesAndPositions) {
 
 function drawDay(ctx, day, posX) {
   const textWidth = ctx.measureText(day).width;
-  ctx.fillText(day, posX - textWidth / 2, 40);
+  ctx.fillText(day, posX - textWidth / 2, dateBar.height / 2);
 }
 
 function drawMonth(ctx, month, posX) {
   const textWidth = ctx.measureText(month).width;
-  ctx.fillText(month, posX - textWidth / 2, 40);
+  ctx.fillText(month, posX - textWidth / 2, dateBar.height / 2);
 }
 
 function drawYear(ctx, year, posX) {
   const textWidth = ctx.measureText(year).width;
-  ctx.fillText(year, posX - textWidth / 2, 40);
+  ctx.fillText(year, posX - textWidth / 2, dateBar.height / 2);
 }
 
 function getDatesAndPositions(datesAndPositions, displayWindow) {
@@ -403,7 +404,8 @@ function restoreCursor() {
 
 function updateCanvasesSize(){
   canvas.height = document.documentElement.clientHeight - form.offsetHeight - dateBar.offsetHeight;
-  canvas.width = canvas.offsetWidth;
+  canvas.width = document.documentElement.clientWidth;
+  //canvas.width = canvas.offsetWidth;
   dateBar.width = canvas.width;
   dateBar.height = document.documentElement.clientHeight - canvas.offsetHeight - form.offsetHeight;
   priceBar.height = canvas.height;
